@@ -208,20 +208,11 @@ class Badge : public QFrame {
 					_closeButton->click();
 					event->accept();
 					break;
-				case Qt::Key_Space:
-				case Qt::Key_Return:
-				case Qt::Key_Enter:
-					emit pickSelected(property("pickID").toString());
-					event->accept();
-					break;
 				default:
 					QFrame::keyPressEvent(event);
 					break;
 			}
 		}
-
-	signals:
-		void pickSelected(const QString &pickID);
 
 	private:
 		QLabel      *_colorLabel;
@@ -439,12 +430,8 @@ void Associator::syncPicksView() {
 		_pickContainer->layout()->addWidget(marker.second);
 	}
 	
-	// Announce pick count to screen readers
-	QAccessibleEvent event(_pickContainer, QAccessible::LiveRegionChanged);
-	event.setChildCount(_markers.count());
-	QString announcement = QString("Pick list updated: %1 seismic picks for association").arg(_markers.count());
-	event.setValue(announcement);
-	QAccessible::updateAccessibility(&event);
+	// Update accessible name for screen readers
+	_pickContainer->setAccessibleName(QString("Pick list with %1 seismic picks").arg(_markers.count()));
 }
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -461,15 +448,6 @@ void Associator::inspectPick(const QString &pickID) {
 	}
 }
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-void Associator::unsetMessage() {
-	_ui.labelMessage->setVisible(false);
-}
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 
 
 

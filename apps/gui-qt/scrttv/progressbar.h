@@ -32,74 +32,51 @@ class ProgressBar : public QFrame
 {
   Q_OBJECT
 
-  public:
-	ProgressBar(QWidget *parent=0)
-	: QFrame(parent)
-	{
-		setMinimumSize(50,10);
-		_value = 0;
-		// Set accessibility attributes
-		setAccessibleName("Progress bar");
-		setAccessibleDescription("Shows loading progress for seismic data");
-	}
-
-  public slots:
-	void reset()
-	{
-		_value = 0;
-		update();
-		// Emit accessibility event
-		 QAccessibleEvent event(this, QAccessible::ValueChanged);
-		 QAccessible::updateAccessibility(&event);
-	}
-
-	void setValue(int val)
-	{
-		_value = val;
-		if (_value>100)
-			_value = 100;
-		repaint();
-		// Emit accessibility event
-		QAccessibleEvent event(this, QAccessible::ValueChanged);
-		QAccessible::updateAccessibility(&event);
-	}
-
-  protected:
-	void paintEvent(QPaintEvent *)
-	{
-		int w=width(), h=height();
-		QPainter paint(this);
-		paint.fillRect(0, 0, int(w*_value / 100), h, QColor(0,0,128));
-	}
-
-	void focusInEvent(QFocusEvent *) override
-	{
-		update();
-	}
-
-	void focusOutEvent(QFocusEvent *) override
-	{
-		update();
-	}
-
-	virtual QAccessible::State state() const override
-	{
-		QAccessible::State state = QFrame::state();
-		state.disabled = false;
-		state.focused = false;
-		return state;
-	}
-
-	virtual QString text(QAccessible::Text t) const override
-	{
-		if (t == QAccessible::Description) {
-			return QString("Data loading progress: %1%").arg(_value);
+	public:
+		ProgressBar(QWidget *parent=0)
+		: QFrame(parent)
+		{
+			setMinimumSize(50,10);
+			_value = 0;
+			setAccessibleName("Progress bar");
+			setAccessibleDescription("Shows loading progress for seismic data");
 		}
-		return QFrame::text(t);
-	}
 
-  private:
-	int _value;
+	public slots:
+		void reset()
+		{
+			_value = 0;
+			update();
+		}
+
+		void setValue(int val)
+		{
+			_value = val;
+			if (_value>100)
+				_value = 100;
+			repaint();
+		}
+
+	protected:
+		void paintEvent(QPaintEvent *)
+		{
+			int w=width(), h=height();
+			QPainter paint(this);
+			paint.fillRect(0, 0, int(w*_value / 100), h, QColor(0,0,128));
+		}
+
+		void focusInEvent(QFocusEvent *) override
+		{
+			update();
+		}
+
+		void focusOutEvent(QFocusEvent *) override
+		{
+			update();
+		}
+
+	private:
+		int _value;
 };
 
 

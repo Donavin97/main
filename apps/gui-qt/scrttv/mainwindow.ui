@@ -14,12 +14,6 @@
    <string>RealtimeTraceView</string>
   </property>
    <widget class="QWidget" name="centralwidget">
-    <property name="accessibleName">
-     <string>Seismic trace display area</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Main waveform display area showing seismic trace data</string>
-    </property>
     <layout class="QVBoxLayout">
     <property name="spacing">
      <number>6</number>
@@ -30,12 +24,6 @@
    </layout>
   </widget>
    <widget class="QMenuBar" name="menubar">
-    <property name="accessibleName">
-     <string>Menu bar</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Application menu bar with File, Edit, View, Mode, and Window menus</string>
-    </property>
     <property name="geometry">
     <rect>
      <x>0</x>
@@ -158,12 +146,6 @@
     <property name="shortcut">
      <string>Alt+Q</string>
     </property>
-    <property name="accessibleName">
-     <string>Quit application</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Close the SeisComp Realtime Trace View application</string>
-    </property>
    </action>
    <action name="actionOpenXMLFile">
     <property name="text">
@@ -171,12 +153,6 @@
     </property>
     <property name="shortcut">
      <string>Ctrl+O</string>
-    </property>
-    <property name="accessibleName">
-     <string>Open XML file</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Load seismic data from XML file</string>
     </property>
    </action>
    <action name="actionLineUp">
@@ -192,13 +168,7 @@
     <property name="shortcut">
      <string>Up</string>
     </property>
-    <property name="accessibleName">
-     <string>Scroll line up</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Move display up by one line</string>
-    </property>
-   </action>
+    </action>
    <action name="actionLineDown">
     <property name="text">
      <string>Line down</string>
@@ -212,13 +182,7 @@
     <property name="shortcut">
      <string>Down</string>
     </property>
-    <property name="accessibleName">
-     <string>Scroll line down</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Move display down by one line</string>
-    </property>
-   </action>
+    </action>
    <action name="actionPageUp">
     <property name="text">
      <string>Page up</string>
@@ -232,13 +196,7 @@
     <property name="shortcut">
      <string>PgUp</string>
     </property>
-    <property name="accessibleName">
-     <string>Scroll page up</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Move display up by one page</string>
-    </property>
-   </action>
+    </action>
    <action name="actionPageDown">
     <property name="text">
      <string>Page down</string>
@@ -252,13 +210,7 @@
     <property name="shortcut">
      <string>PgDown</string>
     </property>
-    <property name="accessibleName">
-     <string>Scroll page down</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Move display down by one page</string>
-    </property>
-   </action>
+    </action>
    <action name="actionToTop">
     <property name="text">
      <string>To top</string>
@@ -272,13 +224,7 @@
     <property name="shortcut">
      <string>Alt+PgUp</string>
     </property>
-    <property name="accessibleName">
-     <string>Scroll to top</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Move display to beginning of data</string>
-    </property>
-   </action>
+    </action>
    <action name="actionToBottom">
     <property name="text">
      <string>To bottom</string>
@@ -292,13 +238,7 @@
     <property name="shortcut">
      <string>Alt+PgDown</string>
     </property>
-    <property name="accessibleName">
-     <string>Scroll to bottom</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Move display to end of data</string>
-    </property>
-   </action>
+    </action>
    <action name="actionScrollLeft">
     <property name="text">
      <string>Scroll left</string>
@@ -312,13 +252,7 @@
     <property name="shortcut">
      <string>Left</string>
     </property>
-    <property name="accessibleName">
-     <string>Scroll left</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Move display left in time</string>
-    </property>
-   </action>
+    </action>
    <action name="actionScrollRight">
     <property name="text">
      <string>Scroll right</string>
@@ -332,13 +266,7 @@
     <property name="shortcut">
      <string>Right</string>
     </property>
-    <property name="accessibleName">
-     <string>Scroll right</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Move display right in time</string>
-    </property>
-   </action>
+    </action>
    <action name="actionNextFilter">
     <property name="checkable">
      <bool>false</bool>
@@ -355,13 +283,7 @@
     <property name="shortcut">
      <string>G</string>
     </property>
-    <property name="accessibleName">
-     <string>Next filter</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Apply next available filter to seismic data</string>
-    </property>
-   </action>
+    </action>
    <action name="actionSortDistance">
     <property name="text">
      <string>Sort by distance</string>
@@ -375,13 +297,7 @@
     <property name="shortcut">
      <string>2</string>
     </property>
-    <property name="accessibleName">
-     <string>Sort by distance</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Sort seismic traces by distance from selected location</string>
-    </property>
-   </action>
+    </action>
   <action name="actionSortStaCode">
     <property name="text">
      <string>Sort by station code</string>
@@ -395,13 +311,7 @@
     <property name="shortcut">
      <string>3</string>
     </property>
-    <property name="accessibleName">
-     <string>Sort by station code</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Sort seismic traces by station code alphabetically</string>
-    </property>
-   </action>
+    </action>
    <action name="actionHorZoomIn">
     <property name="text">
      <string>Zoom in horizontally</string>
@@ -415,13 +325,7 @@
     <property name="shortcut">
      <string>&gt;</string>
     </property>
-    <property name="accessibleName">
-     <string>Horizontal zoom in</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Increase horizontal scale of traces</string>
-    </property>
-   </action>
+    </action>
    <action name="actionHorZoomOut">
     <property name="text">
      <string>Zoom out horizontally</string>
@@ -435,13 +339,7 @@
     <property name="shortcut">
      <string>&lt;</string>
     </property>
-    <property name="accessibleName">
-     <string>Horizontal zoom out</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Decrease horizontal scale of traces</string>
-    </property>
-   </action>
+    </action>
    <action name="actionVerZoomIn">
     <property name="text">
      <string>Zoom in vertically</string>
@@ -455,13 +353,7 @@
     <property name="shortcut">
      <string>Shift+Y</string>
     </property>
-    <property name="accessibleName">
-     <string>Vertical zoom in</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Increase vertical scale of traces</string>
-    </property>
-   </action>
+    </action>
    <action name="actionVerZoomOut">
     <property name="text">
      <string>Zoom out vertically</string>
@@ -475,13 +367,7 @@
     <property name="shortcut">
      <string>Y</string>
     </property>
-    <property name="accessibleName">
-     <string>Vertical zoom out</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Decrease vertical scale of traces</string>
-    </property>
-   </action>
+    </action>
    <action name="actionModeZoom">
     <property name="checkable">
      <bool>false</bool>
@@ -501,13 +387,7 @@
     <property name="menuRole">
      <enum>QAction::NoRole</enum>
     </property>
-    <property name="accessibleName">
-     <string>Zoom mode</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Enable zoom mode to select time ranges</string>
-    </property>
-   </action>
+    </action>
    <action name="actionModePicks">
     <property name="checkable">
      <bool>false</bool>
@@ -527,13 +407,7 @@
     <property name="menuRole">
      <enum>QAction::NoRole</enum>
     </property>
-    <property name="accessibleName">
-     <string>Picks mode</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Enable pick selection mode</string>
-    </property>
-   </action>
+    </action>
   <action name="actionModeShowAmplitude">
     <property name="checkable">
      <bool>false</bool>
@@ -553,13 +427,7 @@
     <property name="menuRole">
      <enum>QAction::NoRole</enum>
     </property>
-    <property name="accessibleName">
-     <string>Show amplitude mode</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Enable amplitude display mode</string>
-    </property>
-   </action>
+    </action>
    <action name="actionFilter">
     <property name="checkable">
      <bool>false</bool>
@@ -570,13 +438,7 @@
     <property name="shortcut">
      <string>Alt+F</string>
     </property>
-    <property name="accessibleName">
-     <string>Filter</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Open filter configuration dialog</string>
-    </property>
-   </action>
+    </action>
    <action name="actionSearch">
     <property name="checkable">
      <bool>false</bool>
@@ -587,13 +449,7 @@
     <property name="shortcut">
      <string>Ctrl+F</string>
     </property>
-    <property name="accessibleName">
-     <string>Search</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Enable search mode to find traces</string>
-    </property>
-   </action>
+    </action>
    <action name="actionAbortSearch">
     <property name="checkable">
      <bool>false</bool>
@@ -604,13 +460,7 @@
     <property name="shortcut">
      <string>Esc</string>
     </property>
-    <property name="accessibleName">
-     <string>Abort search</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Cancel current search operation</string>
-    </property>
-   </action>
+    </action>
    <action name="actionDisplay">
     <property name="text">
      <string>Display</string>
@@ -618,35 +468,17 @@
     <property name="shortcut">
      <string>Alt+D</string>
     </property>
-    <property name="accessibleName">
-     <string>Display settings</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Open display configuration dialog</string>
-    </property>
-   </action>
+    </action>
    <action name="actionContents">
     <property name="text">
      <string>Contents</string>
     </property>
-    <property name="accessibleName">
-     <string>Contents</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Show application help contents</string>
-    </property>
-   </action>
+    </action>
    <action name="actionAbout">
     <property name="text">
      <string>About</string>
     </property>
-    <property name="accessibleName">
-     <string>About</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Show application information</string>
-    </property>
-   </action>
+    </action>
    <action name="actionDefaultDisplay">
     <property name="text">
      <string>Restore default display</string>
@@ -660,13 +492,7 @@
     <property name="shortcut">
      <string>Ctrl+N</string>
     </property>
-    <property name="accessibleName">
-     <string>Default display</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Reset to default display settings</string>
-    </property>
-   </action>
+    </action>
    <action name="actionToggleAllRecords">
     <property name="checkable">
      <bool>true</bool>
@@ -683,13 +509,7 @@
     <property name="shortcut">
      <string>R</string>
     </property>
-    <property name="accessibleName">
-     <string>Toggle all records</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Show or hide all record traces</string>
-    </property>
-   </action>
+    </action>
    <action name="actionAlignLeft">
     <property name="text">
      <string>Align left</string>
@@ -703,13 +523,7 @@
     <property name="shortcut">
      <string>Ctrl+Left</string>
     </property>
-    <property name="accessibleName">
-     <string>Align left</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Align all traces to the left edge</string>
-    </property>
-   </action>
+    </action>
    <action name="actionAlignRight">
     <property name="text">
      <string>Align right</string>
@@ -723,13 +537,7 @@
     <property name="shortcut">
      <string>Ctrl+Right</string>
     </property>
-    <property name="accessibleName">
-     <string>Align right</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Align all traces to the right edge</string>
-    </property>
-   </action>
+    </action>
    <action name="actionRestoreConfigOrder">
     <property name="text">
      <string>Restore config order</string>
@@ -743,13 +551,7 @@
     <property name="shortcut">
      <string>1</string>
     </property>
-    <property name="accessibleName">
-     <string>Restore configuration order</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Sort traces back to original configuration order</string>
-    </property>
-   </action>
+    </action>
 <action name="actionNormalizeVisibleAmplitudes">
     <property name="checkable">
      <bool>true</bool>
@@ -766,13 +568,7 @@
     <property name="shortcut">
      <string>S</string>
     </property>
-    <property name="accessibleName">
-     <string>Normalize amplitudes</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Scale amplitudes to fit visible area</string>
-    </property>
-   </action>
+    </action>
    <action name="actionJumpToLastRecord">
     <property name="text">
      <string>Goto last record</string>
@@ -783,13 +579,7 @@
     <property name="toolTip">
      <string>Goto last record</string>
     </property>
-    <property name="accessibleName">
-     <string>Jump to last record</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Scroll to display the most recent seismic data record</string>
-    </property>
-   </action>
+    </action>
    <action name="actionSelectStreams">
     <property name="text">
      <string>&amp;Select streams</string>
@@ -800,13 +590,7 @@
     <property name="toolTip">
      <string>Select streams</string>
     </property>
-    <property name="accessibleName">
-     <string>Select streams</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Open dialog to select and configure seismic data streams to display</string>
-    </property>
-   </action>
+    </action>
    <action name="actionAddTabulator">
     <property name="text">
      <string>Add tabulator</string>
@@ -814,13 +598,7 @@
     <property name="shortcut">
      <string>Ctrl+T</string>
     </property>
-    <property name="accessibleName">
-     <string>Add tabulator</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Add a new trace view tab panel</string>
-    </property>
-   </action>
+    </action>
    <action name="actionSortNetStaCode">
     <property name="text">
      <string>Sort by network-stationcode</string>
@@ -834,13 +612,7 @@
     <property name="shortcut">
      <string>4</string>
     </property>
-    <property name="accessibleName">
-     <string>Sort by network and station</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Sort seismic traces by network and station code combination</string>
-    </property>
-   </action>
+    </action>
    <action name="actionSortGroup">
     <property name="text">
      <string>Sort by groups</string>
@@ -854,13 +626,7 @@
     <property name="shortcut">
      <string>5</string>
     </property>
-    <property name="accessibleName">
-     <string>Sort by group</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Sort seismic traces by predefined groupings</string>
-    </property>
-   </action>
+    </action>
    <action name="actionAlignOriginTime">
     <property name="text">
      <string>Align on origin time</string>
@@ -874,13 +640,7 @@
     <property name="shortcut">
      <string>O</string>
     </property>
-    <property name="accessibleName">
-     <string>Align to origin time</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Align traces relative to origin time</string>
-    </property>
-   </action>
+    </action>
    <action name="actionListHiddenStreams">
     <property name="text">
      <string>List hidden streams</string>
@@ -894,13 +654,7 @@
     <property name="shortcut">
      <string>H</string>
     </property>
-    <property name="accessibleName">
-     <string>List hidden streams</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Show list of currently hidden seismic data streams</string>
-    </property>
-   </action>
+    </action>
    <action name="actionToggleAutoMove">
     <property name="checkable">
      <bool>true</bool>
@@ -920,13 +674,7 @@
     <property name="shortcut">
      <string>F8</string>
     </property>
-    <property name="accessibleName">
-     <string>Toggle auto move</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Automatically follow latest data</string>
-    </property>
-   </action>
+    </action>
    <action name="actionClearPickMarkers">
     <property name="text">
      <string>Clear loaded picks</string>
@@ -934,13 +682,7 @@
     <property name="shortcut">
      <string>C</string>
     </property>
-    <property name="accessibleName">
-     <string>Clear pick markers</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Remove all seismic pick markers from display</string>
-    </property>
-   </action>
+    </action>
    <action name="actionClearPickCart">
     <property name="text">
      <string>Clear association pick cart</string>
@@ -948,13 +690,7 @@
     <property name="shortcut">
      <string>X</string>
     </property>
-    <property name="accessibleName">
-     <string>Clear pick cart</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Clear all picks from the associator cart</string>
-    </property>
-   </action>
+    </action>
 <action name="actionApplyGain">
     <property name="checkable">
      <bool>true</bool>
@@ -965,13 +701,7 @@
     <property name="text">
      <string>Apply gain</string>
     </property>
-    <property name="accessibleName">
-     <string>Apply gain</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Show or hide scaled amplitude values with gain applied</string>
-    </property>
-   </action>
+    </action>
    <action name="actionPreviousFilter">
     <property name="text">
      <string>Activate previous filter</string>
@@ -979,13 +709,7 @@
     <property name="shortcut">
      <string>D</string>
     </property>
-    <property name="accessibleName">
-     <string>Previous filter</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Apply previous available filter to seismic data</string>
-    </property>
-   </action>
+    </action>
    <action name="actionToggleRecordBorders">
     <property name="checkable">
      <bool>true</bool>
@@ -1002,35 +726,17 @@
     <property name="shortcut">
      <string>B</string>
     </property>
-    <property name="accessibleName">
-     <string>Toggle record borders</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Show or hide record border lines</string>
-    </property>
-   </action>
+    </action>
    <action name="actionZoom">
     <property name="text">
      <string>Zoom</string>
     </property>
-    <property name="accessibleName">
-     <string>Zoom</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Zoom in on selected area</string>
-    </property>
-   </action>
+    </action>
    <action name="actionCollect_picks">
     <property name="text">
      <string>Associate picks</string>
     </property>
-    <property name="accessibleName">
-     <string>Associate picks</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Collect and associate seismic picks</string>
-    </property>
-   </action>
+    </action>
    <action name="actionModeNone">
     <property name="checkable">
      <bool>false</bool>
@@ -1047,13 +753,7 @@
     <property name="menuRole">
      <enum>QAction::NoRole</enum>
     </property>
-    <property name="accessibleName">
-     <string>No mode</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Disable special selection mode</string>
-    </property>
-   </action>
+    </action>
    <action name="actionViewPicks">
     <property name="checkable">
      <bool>true</bool>
@@ -1067,13 +767,7 @@
     <property name="shortcut">
      <string>Ctrl+P</string>
     </property>
-    <property name="accessibleName">
-     <string>View picks</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Show or hide seismic pick markers</string>
-    </property>
-   </action>
+    </action>
    <action name="actionViewArrivals">
     <property name="checkable">
      <bool>true</bool>
@@ -1087,13 +781,7 @@
     <property name="shortcut">
      <string>Ctrl+A</string>
     </property>
-    <property name="accessibleName">
-     <string>View arrivals</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Show or hide phase arrival markers</string>
-    </property>
-   </action>
+    </action>
    <action name="actionReload">
     <property name="text">
      <string>Reload</string>
@@ -1101,13 +789,7 @@
     <property name="shortcut">
      <string>Ctrl+R</string>
     </property>
-    <property name="accessibleName">
-     <string>Reload data</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Reload seismic data from source</string>
-    </property>
-   </action>
+    </action>
    <action name="actionSwitchToRealtime">
     <property name="text">
      <string>Switch to real time</string>
@@ -1115,13 +797,7 @@
     <property name="shortcut">
      <string>Ctrl+Shift+R</string>
     </property>
-    <property name="accessibleName">
-     <string>Switch to realtime</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Switch from historical to realtime data display</string>
-    </property>
-   </action>
+    </action>
    <action name="actionToggleFilter">
     <property name="text">
      <string>Toggle filter</string>
@@ -1129,13 +805,7 @@
     <property name="shortcut">
      <string>F</string>
     </property>
-    <property name="accessibleName">
-     <string>Toggle filter</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Enable or disable current data filter</string>
-    </property>
-   </action>
+    </action>
    <action name="actionLoadDataBack">
     <property name="text">
      <string>Load data - %1</string>
@@ -1149,13 +819,7 @@
     <property name="shortcut">
      <string>Alt+Left</string>
     </property>
-    <property name="accessibleName">
-     <string>Load data backward</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Load seismic data before current time</string>
-    </property>
-   </action>
+    </action>
    <action name="actionLoadDataNext">
     <property name="text">
      <string>Load data + %1</string>
@@ -1180,13 +844,7 @@
     <property name="shortcut">
      <string>Shift+S</string>
     </property>
-    <property name="accessibleName">
-     <string>Toggle spectrogram</string>
-    </property>
-    <property name="accessibleDescription">
-     <string>Show or hide frequency spectrogram</string>
-    </property>
-   </action>
+    </action>
  </widget>
  <resources/>
  <connections/>

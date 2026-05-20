@@ -895,13 +895,9 @@ MainWindow::MainWindow() : _questionApplyChanges(this) {
 	// Set accessibility attributes for menu actions
 	_ui.actionLoadDataBack->setText(tr("Load data - %1").arg(prettyTimeRange(Settings::global.bufferSize)));
 	_ui.actionLoadDataBack->setIconText(_ui.actionLoadDataBack->text());
-	_ui.actionLoadDataBack->setAccessibleName("Load data backward");
-	_ui.actionLoadDataBack->setAccessibleDescription(tr("Load seismic data %1 seconds before current time").arg(Settings::global.bufferSize));
 	
 	_ui.actionLoadDataNext->setText(tr("Load data + %1").arg(prettyTimeRange(Settings::global.bufferSize)));
 	_ui.actionLoadDataNext->setIconText(_ui.actionLoadDataNext->text());
-	_ui.actionLoadDataNext->setAccessibleName("Load data forward");
-	_ui.actionLoadDataNext->setAccessibleDescription(tr("Load seismic data %1 seconds after current time").arg(Settings::global.bufferSize));
 
 	_questionApplyChanges.setText("You are about to enable/disable one or more streams.\n"
 	                              "As a result all streams of the station(s) the stream(s)\n"
@@ -1035,37 +1031,26 @@ MainWindow::MainWindow() : _questionApplyChanges(this) {
 	//setCentralWidget(createTraceView());
 
 	// Add accessibility attributes to key menu actions
-	_ui.actionSelectStreams->setAccessibleName("Select streams");
-	_ui.actionSelectStreams->setAccessibleDescription("Open dialog to select and configure seismic data streams to display");
-	
-	_ui.actionListHiddenStreams->setAccessibleName("List hidden streams");
-	_ui.actionListHiddenStreams->setAccessibleDescription("Show list of currently hidden seismic data streams");
-	
-	_ui.actionOpenXMLFile->setAccessibleName("Open XML file");
-	_ui.actionOpenXMLFile->setAccessibleDescription("Load seismic data from XML file");
-	
-	_ui.actionQuit->setAccessibleName("Quit application");
-	_ui.actionQuit->setAccessibleDescription("Close the SeisComp Realtime Trace View application");
-	
-	_ui.actionNextFilter->setAccessibleName("Next filter");
-	_ui.actionNextFilter->setAccessibleDescription("Apply next available filter to seismic data");
-	
-	_ui.actionPreviousFilter->setAccessibleName("Previous filter");
-	_ui.actionPreviousFilter->setAccessibleDescription("Apply previous available filter to seismic data");
-	
-	_ui.actionToggleFilter->setAccessibleName("Toggle filter");
-	_ui.actionToggleFilter->setAccessibleDescription("Enable or disable current data filter");
-	
-	_ui.actionApplyGain->setAccessibleName("Apply gain");
-	_ui.actionApplyGain->setAccessibleDescription("Show/hide scaled amplitude values with gain applied");
-	
-	_ui.actionRestoreConfigOrder->setAccessibleName("Restore configuration order");
-	_ui.actionRestoreConfigOrder->setAccessibleDescription("Sort traces back to original configuration order");
-	
-	_ui.actionSortDistance->setAccessibleName("Sort by distance");
-	_ui.actionSortDistance->setAccessibleDescription("Sort seismic traces by distance from selected location");
 
-	connect(_ui.actionSelectStreams, SIGNAL(triggered()), this, SLOT(selectStreams()));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+connect(_ui.actionSelectStreams, SIGNAL(triggered()), this, SLOT(selectStreams()));
 	connect(_ui.actionListHiddenStreams, SIGNAL(triggered()), this, SLOT(listHiddenStreams()));
 	//connect(_ui.actionAddTabulator, SIGNAL(triggered()), this, SLOT(addTabulator()));
 
@@ -1078,73 +1063,48 @@ MainWindow::MainWindow() : _questionApplyChanges(this) {
 	connect(_ui.actionApplyGain, SIGNAL(toggled(bool)), this, SLOT(showScaledValues(bool)));
 	connect(_ui.actionRestoreConfigOrder, SIGNAL(triggered()), this, SLOT(sortByConfig()));
 	// Add accessibility attributes to sorting and navigation actions
-	_ui.actionSortStaCode->setAccessibleName("Sort by station code");
-	_ui.actionSortStaCode->setAccessibleDescription("Sort seismic traces by station code alphabetically");
-	
-	_ui.actionSortNetStaCode->setAccessibleName("Sort by network and station");
-	_ui.actionSortNetStaCode->setAccessibleDescription("Sort seismic traces by network and station code combination");
-	
-	_ui.actionSortGroup->setAccessibleName("Sort by group");
-	_ui.actionSortGroup->setAccessibleDescription("Sort seismic traces by predefined groupings");
-	
-	_ui.actionAlignLeft->setAccessibleName("Align left");
-	_ui.actionAlignLeft->setAccessibleDescription("Align all traces to the left edge");
-	
-	_ui.actionAlignRight->setAccessibleName("Align right");
-	_ui.actionAlignRight->setAccessibleDescription("Align all traces to the right edge");
-	
-	_ui.actionJumpToLastRecord->setAccessibleName("Jump to last record");
-	_ui.actionJumpToLastRecord->setAccessibleDescription("Scroll to display the most recent seismic data record");
-	
-	_ui.actionClearPickMarkers->setAccessibleName("Clear pick markers");
-	_ui.actionClearPickMarkers->setAccessibleDescription("Remove all seismic pick markers from display");
-	
-	_ui.actionClearPickCart->setAccessibleName("Clear pick cart");
-	_ui.actionClearPickCart->setAccessibleDescription("Clear all picks from the associator cart");
-	
-	_ui.actionAlignOriginTime->setAccessibleName("Align to origin time");
-	_ui.actionAlignOriginTime->setAccessibleDescription("Align traces relative to origin time");
-	
-	// Navigation actions
-	_ui.actionLineUp->setAccessibleName("Scroll line up");
-	_ui.actionLineUp->setAccessibleDescription("Move display up by one line");
-	
-	_ui.actionLineDown->setAccessibleName("Scroll line down");
-	_ui.actionLineDown->setAccessibleDescription("Move display down by one line");
-	
-	_ui.actionPageUp->setAccessibleName("Scroll page up");
-	_ui.actionPageUp->setAccessibleDescription("Move display up by one page");
-	
-	_ui.actionPageDown->setAccessibleName("Scroll page down");
-	_ui.actionPageDown->setAccessibleDescription("Move display down by one page");
-	
-	_ui.actionToTop->setAccessibleName("Scroll to top");
-	_ui.actionToTop->setAccessibleDescription("Move display to beginning of data");
-	
-	_ui.actionToBottom->setAccessibleName("Scroll to bottom");
-	_ui.actionToBottom->setAccessibleDescription("Move display to end of data");
-	
-	_ui.actionScrollLeft->setAccessibleName("Scroll left");
-	_ui.actionScrollLeft->setAccessibleDescription("Move display left in time");
-	
-	_ui.actionScrollRight->setAccessibleName("Scroll right");
-	_ui.actionScrollRight->setAccessibleDescription("Move display right in time");
-	
-	// View actions
-	_ui.actionViewPicks->setAccessibleName("View picks");
-	_ui.actionViewPicks->setAccessibleDescription("Show or hide seismic pick markers");
-	
-	_ui.actionViewArrivals->setAccessibleName("View arrivals");
-	_ui.actionViewArrivals->setAccessibleDescription("Show orhide phase arrival markers");
-	
-	// Search actions
-	_ui.actionSearch->setAccessibleName("Search");
-	_ui.actionSearch->setAccessibleDescription("Enable search mode to find traces");
-	
-	_ui.actionAbortSearch->setAccessibleName("Abort search");
-	_ui.actionAbortSearch->setAccessibleDescription("Cancel current search operation");
 
-	connect(_ui.actionSortDistance, SIGNAL(triggered()), this, SLOT(sortByDistance()));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Navigation actions
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// View actions
+
+
+
+// Search actions
+
+
+
+connect(_ui.actionSortDistance, SIGNAL(triggered()), this, SLOT(sortByDistance()));
 	connect(_ui.actionSortStaCode, SIGNAL(triggered()), this, SLOT(sortByStationCode()));
 	connect(_ui.actionSortNetStaCode, SIGNAL(triggered()), this, SLOT(sortByNetworkStationCode()));
 	connect(_ui.actionSortGroup, SIGNAL(triggered()), this, SLOT(sortByGroup()));
@@ -1172,25 +1132,17 @@ MainWindow::MainWindow() : _questionApplyChanges(this) {
 	connect(_ui.actionSearch, SIGNAL(triggered()), this, SLOT(enableSearch()));
 	connect(_ui.actionAbortSearch, SIGNAL(triggered()), this, SLOT(abortSearch()));
 
-	_ui.actionModeNone->setAccessibleName("No mode");
-	_ui.actionModeNone->setAccessibleDescription("Disable special selection mode");
-	
-	_ui.actionModeZoom->setAccessibleName("Zoom mode");
-	_ui.actionModeZoom->setAccessibleDescription("Enable zoom mode to select time ranges");
-	
-	_ui.actionModePicks->setAccessibleName("Picks mode");
-	_ui.actionModePicks->setAccessibleDescription("Enable pick selection mode");
-	
-	_ui.actionModeShowAmplitude->setAccessibleName("Show amplitude mode");
-	_ui.actionModeShowAmplitude->setAccessibleDescription("Enable amplitude display mode");
-	
-	_ui.actionReload->setAccessibleName("Reload data");
-	_ui.actionReload->setAccessibleDescription("Reload seismic data from source");
-	
-	_ui.actionSwitchToRealtime->setAccessibleName("Switch to realtime");
-	_ui.actionSwitchToRealtime->setAccessibleDescription("Switch from historical to realtime data display");
 
-	connect(SCApp, SIGNAL(messageAvailable(Seiscomp::Core::Message*, Seiscomp::Client::Packet*)),
+
+
+
+
+
+
+
+
+
+connect(SCApp, SIGNAL(messageAvailable(Seiscomp::Core::Message*, Seiscomp::Client::Packet*)),
 	        this, SLOT(messageArrived(Seiscomp::Core::Message*, Seiscomp::Client::Packet*)));
 
 	connect(SCApp, SIGNAL(addObject(const QString&, Seiscomp::DataModel::Object*)),
@@ -1798,37 +1750,26 @@ TraceView* MainWindow::createTraceView() {
 
 	connect(_ui.actionToggleAllRecords, SIGNAL(toggled(bool)), traceView, SLOT(showAllRecords(bool)));
 	// Zoom and display action accessibility
-	_ui.actionHorZoomIn->setAccessibleName("Horizontal zoom in");
-	_ui.actionHorZoomIn->setAccessibleDescription("Increase horizontal scale of traces");
-	
-	_ui.actionHorZoomOut->setAccessibleName("Horizontal zoom out");
-	_ui.actionHorZoomOut->setAccessibleDescription("Decrease horizontal scale of traces");
-	
-	_ui.actionVerZoomIn->setAccessibleName("Vertical zoom in");
-	_ui.actionVerZoomIn->setAccessibleDescription("Increase vertical scale of traces");
-	
-	_ui.actionVerZoomOut->setAccessibleName("Vertical zoom out");
-	_ui.actionVerZoomOut->setAccessibleDescription("Decrease vertical scale of traces");
-	
-	_ui.actionDefaultDisplay->setAccessibleName("Default display");
-	_ui.actionDefaultDisplay->setAccessibleDescription("Reset to default display settings");
-	
-	_ui.actionNormalizeVisibleAmplitudes->setAccessibleName("Normalize amplitudes");
-	_ui.actionNormalizeVisibleAmplitudes->setAccessibleDescription("Scale amplitudes to fit visible area");
-	
-	_ui.actionToggleSpectrogram->setAccessibleName("Toggle spectrogram");
-	_ui.actionToggleSpectrogram->setAccessibleDescription("Show or hide frequency spectrogram");
-	
-	_ui.actionToggleAutoMove->setAccessibleName("Toggle auto move");
-	_ui.actionToggleAutoMove->setAccessibleDescription("Automatically follow latest data");
-	
-	_ui.actionToggleAllRecords->setAccessibleName("Toggle all records");
-	_ui.actionToggleAllRecords->setAccessibleDescription("Show or hide all record traces");
-	
-	_ui.actionToggleRecordBorders->setAccessibleName("Toggle record borders");
-	_ui.actionToggleRecordBorders->setAccessibleDescription("Show or hide record border lines");
 
-	connect(_ui.actionToggleRecordBorders, SIGNAL(toggled(bool)), traceView, SLOT(showRecordBorders(bool)));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+connect(_ui.actionToggleRecordBorders, SIGNAL(toggled(bool)), traceView, SLOT(showRecordBorders(bool)));
 	connect(_ui.actionToggleSpectrogram, SIGNAL(toggled(bool)), traceView, SLOT(toggleSpectrogram(bool)));
 
 	connect(_ui.actionHorZoomIn, SIGNAL(triggered()), traceView, SLOT(horizontalZoomIn()));
@@ -2046,7 +1987,7 @@ void MainWindow::setupItem(const Record*, Gui::RecordViewItem *item) {
 		break;
 	}
 
-	connect(item->widget(), &Gui::RecordWidget::cursorUpdated, this, [this](Gui::RecordWidget *widget, int) {
+	connect(item->widget(), &Gui::RecordWidget::cursorUpdated, this, [this, &streamID](Gui::RecordWidget *widget, int) {
 		auto t = widget->cursorPos();
 		auto v = widget->value(t);
 		QString msg;
@@ -2060,9 +2001,7 @@ void MainWindow::setupItem(const Record*, Gui::RecordViewItem *item) {
 			}
 			widget->setCursorText(ct);
 			
-			// Accessibility: announce cursor position and value to screen readers
-			QAccessibleEvent event(widget, QAccessible::Focus);
-			auto streamID = widget->streamID();
+			// Accessibility: update the widget's accessible name with current info
 			QString announcement = QString("Trace %1.%2.%3.%4 at %5: %6").arg(
 				streamID.networkCode().c_str(),
 				streamID.stationCode().c_str(),
@@ -2070,8 +2009,7 @@ void MainWindow::setupItem(const Record*, Gui::RecordViewItem *item) {
 				streamID.channelCode().c_str(),
 				t.iso().c_str(),
 				ct);
-			event.setValue(announcement);
-			QAccessible::updateAccessibility(&event);
+			widget->setAccessibleName(announcement);
 		}
 		else {
 			msg = QString("No value at %1").arg(t.iso().c_str());
@@ -4398,7 +4336,6 @@ bool MainWindow::addPick(Pick* pick, int refCount) {
 		marker->setSNR(snrValue);
 	}
 	
-	QAccessibleEvent pickEvent(item->widget(), QAccessible::LiveRegionChanged);
 	QString phaseHint;
 	try {
 		phaseHint = pick->phaseHint().code().c_str();
@@ -4419,8 +4356,8 @@ bool MainWindow::addPick(Pick* pick, int refCount) {
 		pickAnnouncement += QString(" SNR %1 dB").arg(snrValue, 0, 'f', 1);
 	}
 	
-	pickEvent.setValue(pickAnnouncement);
-	QAccessible::updateAccessibility(&pickEvent);
+	// Update accessible name for screen readers
+	item->widget()->setAccessibleName(pickAnnouncement);
 
 	return true;
 }

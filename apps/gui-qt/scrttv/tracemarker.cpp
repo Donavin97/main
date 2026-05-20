@@ -210,6 +210,7 @@ void TraceMarker::drawBackground(QPainter &painter, Gui::RecordWidget *,
 
 
 
+
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 QString TraceMarker::accessibleDescription() const {
 	if ( !pick ) {
@@ -243,21 +244,6 @@ QString TraceMarker::accessibleDescription() const {
 	return desc;
 }
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-}
-}
-}
-}
-
-	painter.fillRect(x - 4, y1, 4, y2 - y1,
-	                 SCApp->palette().color(QPalette::Highlight));
-}
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
 
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
