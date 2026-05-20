@@ -39,12 +39,22 @@ class TraceMarker : public Gui::RecordMarker {
 		bool isAssociated() const {
 			return _isAssociated;
 		}
+		
+		void setSNR(double snr) {
+			_snr = snr;
+			_hasSNR = true;
+		}
+		
+		double snr() const { return _snr; }
+		bool hasSNR() const { return _hasSNR; }
 
 	public:
 		QString toolTip() const override;
 		void drawBackground(QPainter &painter, Gui::RecordWidget *context,
 		                    int x, int y1, int y2,
 		                    QColor color, qreal lineWidth) override;
+		
+		QString accessibleDescription() const;
 
 	private:
 		void updateStyle();
@@ -55,6 +65,8 @@ class TraceMarker : public Gui::RecordMarker {
 	private:
 		bool _isSelected{false};
 		bool _isAssociated{false};
+		double _snr{0.0};
+		bool _hasSNR{false};
 };
 
 

@@ -210,6 +210,55 @@ void TraceMarker::drawBackground(QPainter &painter, Gui::RecordWidget *,
 
 
 
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+QString TraceMarker::accessibleDescription() const {
+	if ( !pick ) {
+		return "Seismic pick marker";
+	}
+	
+	QString desc = "Seismic pick ";
+	
+	try {
+		desc += QString("station %1.%2.%3.%4 ").arg(
+			pick->waveformID().networkCode().c_str(),
+			pick->waveformID().stationCode().c_str(),
+			pick->waveformID().locationCode().c_str(),
+			pick->waveformID().channelCode().c_str());
+	}
+	catch ( ... ) {}
+	
+	try {
+		desc += QString("phase %1 ").arg(pick->phaseHint().code().c_str());
+	}
+	catch ( ... ) {
+		desc += "phase unknown ";
+	}
+	
+	if ( _hasSNR ) {
+		desc += QString("SNR %1 dB ").arg(_snr, 0, 'f', 1);
+	}
+	
+	desc += isAssociated() ? "associated" : "not associated";
+	
+	return desc;
+}
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+}
+}
+}
+}
+
+	painter.fillRect(x - 4, y1, 4, y2 - y1,
+	                 SCApp->palette().color(QPalette::Highlight));
+}
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 }

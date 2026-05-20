@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<seiscomp>
+	<module name="scmultipick" category="Processing/Pickers" inherit-global-bindings="true">
+		<description>
+			Multi-phase detection and picking on waveforms (P and S phases).
+			Automatic seismic phase picking using multiple picker algorithms with enhanced AIC capabilities.
+		</description>
+		<configuration>
+			<!-- Basic Configuration -->
+			<parameter name="ringBufferSize" type="int" default="300" unit="s">
+				<description>Size of the ring buffer in seconds</description>
+			</parameter>
+			<parameter name="useAllStreams" type="boolean" default="false">
+				<description>Create a picker for every stream data is received for</description>
+			</parameter>
+			<parameter name="sensitivityCorrection" type="boolean" default="false">
+				<description>Enable sensitivity correction (convert counts to physical units m/s)</description>
+			</parameter>
+			<parameter name="calculateAmplitudes" type="boolean" default="true">
+				<description>Enables/disables amplitude calculation</description>
+			</parameter>
+			<parameter name="defaultChannel" type="string" default="BH">
+				<description>The default channel to pick on for a station without component code</description>
+			</parameter>
+			<parameter name="defaultFilter" type="string" default="RMHP(10)>>ITAPER(30)>>BW(4,0.7,2)>>STALTA(2,80)">
+				<description>The default filter when no per station configuration has been read</description>
+			</parameter>
+			<parameter name="defaultSFilter" type="string" default="RMHP(10)>>ITAPER(30)>>BW(4,0.5,1.5)>>STALTA(2,80)">
+				<description>The default filter for S-phase picking on horizontal components</description>
+			</parameter>
+			<parameter name="defaultTimeCorrection" type="double" default="-0.8">
+				<description>The default time correction in seconds to apply when a pick is going to be emitted</description>
+			</parameter>
+			<parameter name="leadTime" type="double" default="60.0">
+				<description>The timespan in seconds that will be subtracted from NOW to acquire records</description>
+			</parameter>
+			<parameter name="initTime" type="double" default="60.0">
+				<description>The initialization time per stream in seconds after the first record has been received</description>
+			</parameter>
+			
+			<!-- Trigger Configuration -->
+			<group name="thresholds">
+				<description>Threshold parameters for the primary picker.</description>
+				<parameter name="triggerOn" type="double" default="3.0">
+					<description>For which value on the filtered waveforms is a pick detected. Station specific values override this value.</description>
+				</parameter>
+				<parameter name="triggerOff" type="double" default="1.5">
+					<description>The value the filtered waveforms must reach to enable detection again. Between triggerOn and triggerOff the picker is blind and does not produce picks. Station specific values override this value.</description>
+				</parameter>
+				<parameter name="deadTime" type="double" default="30.0">
+					<description>The time used together with measured amplitude and `thresholds.minAmplOffset` for scaling the amplitude below which the picker is inactive after a P pick.</description>
+				</parameter>
+				<parameter name="maxGapLength" type="double" default="4.5">
+					<description>The maximum gap length in seconds to handle. Gaps larger than this will cause the picker to be reset.</description>
+				</parameter>
+				<parameter name="amplMaxTimeWindow" type="double" default="10.0">
+					<description>The time window used to compute a maximum (snr) amplitude on the filtered waveforms.</description>
+				</parameter>
+				<parameter name="minAmplOffset" type="double" default="3.0">
+					<description>The amplitude used together with measured amplitude and `thresholds.deadTime` for scaling the amplitude below which the picker is inactive after a P pick. The value is typically similar to the trigger threshold.</description>
+				</parameter>
+				<parameter name="minDuration" type="double" default="-1">
+					<description>The minimum duration to reach. The duration is measured as the time between trigger on and trigger off. If this value is configured, the detection (pick) will be delayed in order to compute and check the duration.</description>
+				</parameter>
+				<parameter name="maxDuration" type="double" default="-1">
+					<description>The maximum duration allowed. The duration is measured as the time between trigger on and trigger off. If this value is configured, the detection (pick) will be delayed in order to compute and check the duration. Negative values deactivate the check.</description>
+				</parameter>
+			</group>
+			
+			<!-- Phase Configuration -->
+			<parameter name="phaseHint" type="string" default="P">
+				<description>The phase hint for primary picks</description>
+			</parameter>
+			<parameter name="secondaryPhaseHint" type="string" default="S">
+				<description>The phase hint for secondary picks</description>
+			</parameter>
+			<parameter name="picker" type="string" values="AIC,BK,GFZ">
+				<description>The picker type to use for primary phase detection</description>
+			</parameter>
+			<parameter name="spickerType" type="string" values="S-L2,S-V">
+				<description>The secondary picker type to use for S-phase detection</description>
+			</parameter>
+			<parameter name="killPendingSPickers" type="boolean" default="true">
+				<description>Whether to kill previously started secondary pickers when a new primary pick has been declared</description>
+			</parameter>
+			
+			<!-- Multi-phase Configuration -->
+			<parameter name="multipick.enablePPhases" type="boolean" default="true">
+				<description>Enable/disable P-phase picking</description>
+			</parameter>
+			<parameter name="multipick.enableSPhases" type="boolean" default="true">
+				<description>Enable/disable S-phase picking</description>
+			</parameter>
+			<parameter name="multipick.enableRegionalPhases" type="boolean" default="true">
+				<description>Enable/disable regional phase picking (Pg, Sg, etc.)</description>
+			</parameter>
+			<parameter name="multipick.enableCorePhases" type="boolean" default="false">
+				<description>Enable/disable core phase picking (PKP, PKIKP, etc.)</description>
+			</parameter>
+			<parameter name="multipick.phaseClassificationMethod" type="string" default="auto">
+				<description>Phase classification method: "auto", "component", "polarization"</description>
+			</parameter>
+			<parameter name="multipick.minSPhaseSNR" type="double" default="2.0">
+				<description>Minimum SNR for S-phase detection</description>
+			</parameter>
+			<parameter name="multipick.minPPhaseSNR" type="double" default="2.0">
+				<description>Minimum SNR for P-phase detection</description>
+			</parameter>
+			<parameter name="multipick.sPhaseSearchWindow" type="double" default="60.0">
+				<description>Time window for S-phase search after P pick (seconds)</description>
+			</parameter>
+			<parameter name="multipick.minPSTimeDiff" type="double" default="1.0">
+				<description>Minimum P-S time difference (seconds)</description>
+			</parameter>
+			<parameter name="multipick.autoPhaseByComponent" type="boolean" default="true">
+				<description>Enable automatic phase identification based on component (BHZ -> P, BHN/BHE -> S)</description>
+			</parameter>
+			<parameter name="multipick.useAmplitudeRatio" type="boolean" default="true">
+				<description>Use amplitude ratio for phase classification (H/V ratio)</description>
+			</parameter>
+			<parameter name="multipick.vhRatioThreshold" type="double" default="1.5">
+				<description>Expected V/H amplitude ratio threshold for P vs S</description>
+			</parameter>
+			<parameter name="multipick.usePolarization" type="boolean" default="false">
+				<description>Enable polarization analysis for phase classification</description>
+			</parameter>
+			<parameter name="multipick.maxRegionalDistance" type="double" default="20.0">
+				<description>Maximum distance for regional phase classification (degrees)</description>
+			</parameter>
+			<parameter name="multipick.minTeleseismicDistance" type="double" default="30.0">
+				<description>Minimum distance for teleseismic phase classification (degrees)</description>
+			</parameter>
+			<parameter name="multipick.sFilter" type="string">
+				<description>S-phase filter (if different from P-phase filter)</description>
+			</parameter>
+			<parameter name="multipick.sTriggerOnThreshold" type="double">
+				<description>S-phase trigger on threshold (if different from P-phase)</description>
+			</parameter>
+			<parameter name="multipick.sTriggerOffThreshold" type="double">
+				<description>S-phase trigger off threshold (if different from P-phase)</description>
+			</parameter>
+			<parameter name="multipick.sTimeCorrection" type="double">
+				<description>S-phase time correction (if different from P-phase)</description>
+			</parameter>
+			<parameter name="multipick.sTriggerDeadTime" type="double" default="30.0">
+				<description>S-phase dead time</description>
+			</parameter>
+			
+			<!-- Enhanced AIC Picker Configuration -->
+			<parameter name="useEnhancedAICPicker" type="boolean" default="false">
+				<description>Enable enhanced AIC picker with two-pass approach and confidence weighting</description>
+			</parameter>
+			<parameter name="multipick.aicMarginMin" type="int" default="5">
+				<description>Minimum margin for AIC picker window</description>
+			</parameter>
+			<parameter name="multipick.aicMarginMax" type="int" default="20">
+				<description>Maximum margin for AIC picker window</description>
+			</parameter>
+			<parameter name="multipick.aicConfidenceThreshold" type="double" default="0.5">
+				<description>Confidence threshold for enhanced AIC picker (0.0-1.0)</description>
+			</parameter>
+			<parameter name="multipick.aicAdaptiveWindows" type="boolean" default="true">
+				<description>Enable adaptive windows for enhanced AIC picker</description>
+			</parameter>
+			<parameter name="multipick.aicMultiBand" type="boolean" default="false">
+				<description>Enable multi-band processing for enhanced AIC picker</description>
+			</parameter>
+			<parameter name="multipick.aicNumBands" type="int" default="3">
+				<description>Number of bands for multi-band AIC picker</description>
+			</parameter>
+			
+			<!-- Amplitude Configuration -->
+			<parameter name="amplitudes" type="list:string" default="MLv, mb, mB">
+				<description>The amplitude types to be computed by the picker based on picks</description>
+			</parameter>
+			<group name="amplitudes">
+				<parameter name="enableUpdate" type="list:string" default="">
+					<description>Configure a list of magnitude types. Update and send amplitudes for these magnitudes as soon as data are available. Do not wait for complete time windows. Only magnitudes computed by scmultipick as given by the amplitudes parameter are considered. This option is for rapid magnitude estimation and EEW.</description>
+				</parameter>
+			</group>
+			<parameter name="minSNR" type="double" default="3.0">
+				<description>Global minimum SNR for amplitude processors (fallback)</description>
+			</parameter>
+			
+			<!-- Feature Extraction -->
+			<parameter name="fx" type="string" values="DFX">
+				<description>Configures the feature extraction type to use. Currently available: "DFX"</description>
+			</parameter>
+			
+			<!-- Other Configuration -->
+			<parameter name="interpolateGaps" type="boolean" default="false">
+				<description>Enables/disables gap interpolation</description>
+			</parameter>
+			<parameter name="sendDetections" type="boolean" default="false">
+				<description>If enabled and a picker is configured, then initial detections are sent as well</description>
+			</parameter>
+			<parameter name="extraPickComments" type="boolean" default="false">
+				<description>If enabled and a picker or spicker is configured, extra comments will be added to the resulting pick</description>
+			</parameter>
+			<parameter name="playback" type="boolean" default="false">
+				<description>Accept historic data in real-time playbacks</description>
+			</parameter>
+			<parameter name="simplifiedIDs" type="boolean" default="false">
+				<description>If enabled then simplified pick and amplitude IDs will be created</description>
+			</parameter>
+			
+			<!-- Connection Configuration -->
+			<group name="connection">
+				<parameter name="amplitudeGroup" type="string" default="AMPLITUDE">
+					<description>Message group for sending amplitudes to</description>
+				</parameter>
+			</group>
+			
+			<!-- Comment Configuration -->
+			<group name="comment">
+				<description>Properties of a custom comment added to a pick</description>
+				<parameter name="ID" type="string" default="">
+					<description>The ID of a custom comment</description>
+				</parameter>
+				<parameter name="text" type="string" default="">
+					<description>The text of a custom comment</description>
+				</parameter>
+			</group>
+		</configuration>
+		<command-line>
+			<group name="Generic">
+				<optionReference>generic#help</optionReference>
+				<optionReference>generic#version</optionReference>
+				<optionReference>generic#config-file</optionReference>
+				<optionReference>generic#plugins</optionReference>
+				<optionReference>generic#daemon</optionReference>
+				<optionReference>generic#auto-shutdown</optionReference>
+				<optionReference>generic#shutdown-master-module</optionReference>
+				<optionReference>generic#shutdown-master-username</optionReference>
+			</group>
+
+			<group name="Verbosity">
+				<optionReference>verbosity#verbosity</optionReference>
+				<optionReference>verbosity#v</optionReference>
+				<optionReference>verbosity#quiet</optionReference>
+				<optionReference>verbosity#component</optionReference>
+				<optionReference>verbosity#syslog</optionReference>
+				<optionReference>verbosity#lockfile</optionReference>
+				<optionReference>verbosity#console</optionReference>
+				<optionReference>verbosity#debug</optionReference>
+				<optionReference>verbosity#log-file</optionReference>
+			</group>
+
+			<group name="Messaging">
+				<optionReference>messaging#user</optionReference>
+				<optionReference>messaging#host</optionReference>
+				<optionReference>messaging#timeout</optionReference>
+				<optionReference>messaging#primary-group</optionReference>
+				<optionReference>messaging#subscribe-group</optionReference>
+				<optionReference>messaging#content-type</optionReference>
+				<optionReference>messaging#start-stop-msg</optionReference>
+			</group>
+
+			<group name="Database">
+				<optionReference>database#db-driver-list</optionReference>
+				<optionReference>database#database</optionReference>
+				<optionReference>database#config-module</optionReference>
+				<optionReference>database#inventory-db</optionReference>
+				<option flag="" long-flag="db-disable" argument="" publicID="database#db-disable">
+					<description>Do not use the database at all</description>
+				</option>
+			</group>
+
+			<group name="Records">
+				<optionReference>records#record-driver-list</optionReference>
+				<optionReference>records#record-url</optionReference>
+				<optionReference>records#record-file</optionReference>
+				<optionReference>records#record-type</optionReference>
+			</group>
+
+			<group name="Mode">
+				<option flag="" long-flag="offline">
+					<description>Do not connect to a messaging server and do not use the database</description>
+				</option>
+				<option flag="" long-flag="playback">
+					<description>Switches to playback mode which does not request a particular time window from the input data source. This implies that all records are forwarded to scmultipick if files are being used. Without this option scmultipick would not work anymore with older datasets in offline mode or when running playbacks.</description>
+				</option>
+				<option flag="" long-flag="ep">
+					<description>Outputs an XML event parameters file containing all picks and amplitudes. This option implies '--offline'. Consider '--playback' or configure accordingly for processing data from the past.</description>
+				</option>
+				<option flag="" long-flag="amplitudes" argument="arg" default="1">
+					<description>Enables or disables computation of amplitudes</description>
+				</option>
+				<option flag="" long-flag="test">
+					<description>Runs the picker as usual but does not send any messages. This can be useful to test the picker within a running system</description>
+				</option>
+				<option flag="" long-flag="dump-config">
+					<description>Dumps the current configuration and exits. Station configuration is only read if the picker connects to the messaging and the database. In offline mode it will only dump the application specific setting unless a station.conf file is provided</description>
+				</option>
+				<option flag="" long-flag="dump-records">
+					<description>This option only works in combination with :option:`--offline`. It will dump the data of an amplitude processor if it completed processing successfully and a new amplitude is available. The output format is a simple ASCII format.</description>
+				</option>
+			</group>
+
+			<group name="Settings">
+				<option long-flag="filter" argument="filter" param-ref="filter"/>
+				<option long-flag="s-filter" argument="filter" param-ref="defaultSFilter"/>
+				<option long-flag="time-correction" argument="time" param-ref="timeCorrection"/>
+				<option long-flag="buffer-size" argument="timespan" param-ref="ringBufferSize"/>
+				<option long-flag="before" argument="timespan" param-ref="leadTime"/>
+				<option long-flag="init-time" argument="timespan" param-ref="initTime"/>
+				<option long-flag="trigger-on" argument="arg" param-ref="thresholds.triggerOn"/>
+				<option long-flag="trigger-off" argument="arg" param-ref="thresholds.triggerOff"/>
+				<option long-flag="trigger-dead-time" argument="arg" param-ref="thresholds.deadTime"/>
+				<option long-flag="ampl-max-time-window" argument="arg" param-ref="thresholds.amplMaxTimeWindow"/>
+				<option long-flag="min-ampl-offset" argument="arg" param-ref="thresholds.minAmplOffset"/>
+				<option long-flag="gap-tolerance" argument="arg" param-ref="thresholds.maxGapLength"/>
+				<option long-flag="gap-interpolation" argument="arg" param-ref="interpolateGaps"/>
+				<option long-flag="any-stream" argument="arg" param-ref="useAllStreams"/>
+				<option long-flag="send-detections" param-ref="sendDetections"/>
+				<option long-flag="extra-comments" param-ref="extraPickComments"/>
+				
+				<!-- Multi-phase options -->
+				<option long-flag="enable-p" argument="arg" param-ref="multipick.enablePPhases"/>
+				<option long-flag="enable-s" argument="arg" param-ref="multipick.enableSPhases"/>
+				<option long-flag="enable-regional" argument="arg" param-ref="multipick.enableRegionalPhases"/>
+				<option long-flag="phase-method" argument="arg" param-ref="multipick.phaseClassificationMethod"/>
+				<option long-flag="min-s-snr" argument="arg" param-ref="multipick.minSPhaseSNR"/>
+			</group>
+
+			<group name="EnhancedAIC">
+				<option long-flag="use-enhanced-aic" argument="arg" param-ref="useEnhancedAICPicker"/>
+				<option long-flag="aic-margin-min" argument="arg" param-ref="multipick.aicMarginMin"/>
+				<option long-flag="aic-margin-max" argument="arg" param-ref="multipick.aicMarginMax"/>
+				<option long-flag="aic-confidence" argument="arg" param-ref="multipick.aicConfidenceThreshold"/>
+			</group>
+
+			<group name="Output">
+				<option flag="f" long-flag="formatted">
+					<description>Use formatted XML output along with '--ep'. Otherwise XML is unformatted</description>
+				</option>
+			</group>
+		</command-line>
+	</module>
+
+	<!-- The basic binding description. Configures a station for picking. A station without a binding assigned will not be picked unless the picker is in offline mode. -->
+	<binding module="scmultipick">
+		<description>
+			Configures a station for picking. A station without a binding assigned will not be picked unless the picker is in offline mode.
+		</description>
+		<configuration>
+			<parameter name="detecEnable" type="boolean" default="true">
+				<description>Enables/disables picking on a station</description>
+			</parameter>
+			<parameter name="detecFilter" type="string" default="RMHP(10)>>ITAPER(30)>>BW(4,0.7,2)>>STALTA(2,80)">
+				<summary>Defines the filter to be used for picking</summary>
+				<description>Defines the filter to be used for picking. Station-specific configurations (bindings) override this value.</description>
+			</parameter>
+			<parameter name="trigOn" type="double" default="3">
+				<description>For which value on the filtered waveform is a pick detected</description>
+			</parameter>
+			<parameter name="trigOff" type="double" default="1.5">
+				<description>The value the filtered waveform must reach to enable a detection again</description>
+			</parameter>
+			<parameter name="timeCorr" type="double" default="-0.8" unit="s">
+				<description>The time correction applied to a pick</description>
+			</parameter>
+			<parameter name="sensitivityCorrection" type="boolean" default="false">
+				<description>Defines whether the detector applies sensitivity correction (applying the gain) or not in advance to filter the data</description>
+			</parameter>
+			
+			<!-- S-phase specific binding parameters -->
+			<parameter name="sFilter" type="string">
+				<description>S-phase filter (if different from P-phase filter)</description>
+			</parameter>
+			<parameter name="sTriggerOn" type="double">
+				<description>S-phase trigger on threshold (if different from P-phase)</description>
+			</parameter>
+			<parameter name="sTriggerOff" type="double">
+				<description>S-phase trigger off threshold (if different from P-phase)</description>
+			</parameter>
+			<parameter name="sTimeCorrection" type="double">
+				<description>S-phase time correction (if different from P-phase)</description>
+			</parameter>
+			<parameter name="sDeadTime" type="double" default="30.0">
+				<description>S-phase dead time</description>
+			</parameter>
+		</configuration>
+	</binding>
+</seiscomp>

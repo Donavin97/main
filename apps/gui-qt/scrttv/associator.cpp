@@ -130,10 +130,17 @@ class Badge : public QFrame {
 			content->layout()->setContentsMargins(0, 0, 0, 0);
 
 			QString labelText = waveformIDToString(marker->pick->waveformID());
+			QString phaseHint;
 			try {
-				labelText += QString("- %1").arg(marker->pick->phaseHint().code().c_str());
+				phaseHint = QString(marker->pick->phaseHint().code().c_str());
+				labelText += QString("- %1").arg(phaseHint);
 			}
 			catch ( ... ) {}
+			
+			setAccessibleName(QString("Seismic pick %1 %2").arg(
+				waveformIDToString(marker->pick->waveformID())).arg(phaseHint));
+			setAccessibleDescription(QString("Seismic pick at %1 with phase %2. Double click to select, click X to remove").arg(
+				waveformIDToString(marker->pick->waveformID())).arg(phaseHint));
 
 			if ( badges.contains(labelText) ) {
 				auto pal = content->palette();
@@ -150,22 +157,31 @@ class Badge : public QFrame {
 			content->setAutoFillBackground(true);
 			content->setToolTip(marker->toolTip());
 			content->setProperty("pickID", QString(marker->pick->publicID().c_str()));
+			content->setAccessibleName(QString("Pick content %1").arg(labelText));
+			content->setAccessibleDescription("Container for pick information");
 
 			_colorLabel = new QLabel;
 			_colorLabel->setBackgroundRole(QPalette::Window);
 			_colorLabel->setAutoFillBackground(true);
 			_colorLabel->setFixedWidth(4);
+			_colorLabel->setAccessibleName("Pick color indicator");
+			_colorLabel->setAccessibleDescription("Visual color indicator for the pick");
 			content->layout()->addWidget(_colorLabel);
 
 			setColor(marker->color());
 
 			auto label = new QLabel(labelText);
 			label->setForegroundRole(content->foregroundRole());
+			label->setAccessibleName("Pick label");
+			label->setAccessibleDescription(QString("Station %1 phase %2").arg(
+				waveformIDToString(marker->pick->waveformID())).arg(phaseHint));
 			content->layout()->addWidget(label);
 
 			_closeButton = new QPushButton();
 			_closeButton->setIcon(icon("close_red"));
 			_closeButton->setFlat(true);
+			_closeButton->setAccessibleName("Remove pick");
+			_closeButton->setAccessibleDescription(QString("Remove pick %1 from association").arg(labelText));
 
 			content->layout()->addWidget(_closeButton);
 		}
@@ -179,6 +195,33 @@ class Badge : public QFrame {
 		QPushButton *buttonClose() const {
 			return _closeButton;
 		}
+		
+		QString pickID() const {
+			return property("pickID").toString();
+		}
+
+	protected:
+		void keyPressEvent(QKeyEvent *event) override {
+			switch ( event->key() ) {
+				case Qt::Key_Delete:
+				case Qt::Key_Backspace:
+					_closeButton->click();
+					event->accept();
+					break;
+				case Qt::Key_Space:
+				case Qt::Key_Return:
+				case Qt::Key_Enter:
+					emit pickSelected(property("pickID").toString());
+					event->accept();
+					break;
+				default:
+					QFrame::keyPressEvent(event);
+					break;
+			}
+		}
+
+	signals:
+		void pickSelected(const QString &pickID);
 
 	private:
 		QLabel      *_colorLabel;
@@ -195,12 +238,22 @@ class Badge : public QFrame {
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Associator::Associator(QWidget *parent) : QWidget(parent) {
 	_ui.setupUi(this);
+	
+	// Set accessibility attributes for the main widget
+	setAccessibleName("Associator control panel");
+	setAccessibleDescription("Panel for associating seismic picks and locating events");
+	
 	setupOriginInfo();
 	unsetMessage();
 
 	_ui.btnLocatorSettings->setIcon(icon("settings"));
+	_ui.btnLocatorSettings->setAccessibleName("Locator settings");
+	_ui.btnLocatorSettings->setAccessibleDescription("Open settings dialog for seismic locator configuration");
+	
 	_ui.framePicks->setLayout(new QVBoxLayout);
 	_ui.framePicks->layout()->setContentsMargins(0, 0, 0, 0);
+	_ui.framePicks->setAccessibleName("Pick list");
+	_ui.framePicks->setAccessibleDescription("List of seismic picks for association");
 
 	QScrollArea *area = new QScrollArea();
 	_ui.framePicks->layout()->addWidget(area);
@@ -210,8 +263,13 @@ Associator::Associator(QWidget *parent) : QWidget(parent) {
 
 	area->setWidget(_pickContainer);
 	area->setWidgetResizable(true);
+	area->setAccessibleName("Pick scroll area");
+	area->setAccessibleDescription("Scrollable area containing seismic pick items");
 
 	_ui.frameMap->setLayout(new QVBoxLayout);
+	_ui.frameMap->setAccessibleName("Map view");
+	_ui.frameMap->setAccessibleDescription("Interactive map view for event location");
+	
 	_mapWidget = new OriginLocatorMap(SCApp->mapsDesc(), _ui.frameMap);
 	auto sizePolicy = _mapWidget->sizePolicy();
 	sizePolicy.setHeightForWidth(true);
@@ -231,6 +289,8 @@ Associator::Associator(QWidget *parent) : QWidget(parent) {
 		delete locators;
 		if ( _ui.cbLocator->count() > 0 ) {
 			_ui.cbLocator->setEnabled(true);
+			_ui.cbLocator->setAccessibleName("Locator selection");
+			_ui.cbLocator->setAccessibleDescription("Select seismic locator algorithm for event association");
 
 			int defaultIndex = _ui.cbLocator->findText(Settings::global.defaultLocator.c_str());
 			_ui.cbLocator->setCurrentIndex(defaultIndex >= 0 ? defaultIndex: 0);
@@ -246,6 +306,8 @@ Associator::Associator(QWidget *parent) : QWidget(parent) {
 		_ui.cbDepth->addItem(QString("%1").arg(depth, 0, 'f', SCScheme.precision.depth));
 	}
 	_ui.cbDepth->clearEditText();
+	_ui.cbDepth->setAccessibleName("Event depth");
+	_ui.cbDepth->setAccessibleDescription("Set the depth for event location in kilometers");
 
 	connect(_ui.cbLocator, SIGNAL(currentTextChanged(QString)),
 	        this, SLOT(locatorChanged(QString)));
@@ -253,9 +315,20 @@ Associator::Associator(QWidget *parent) : QWidget(parent) {
 	connect(_ui.btnLocatorSettings, SIGNAL(clicked()),
 	        this, SLOT(configureLocator()));
 
+	_ui.btnLocatorSettings->setAccessibleName("Locator settings");
+	_ui.btnLocatorSettings->setAccessibleDescription("Configure seismic locator parameters and algorithms");
+
 	connect(_ui.btnShowOrigin, SIGNAL(clicked()), this, SLOT(showOrigin()));
+	_ui.btnShowOrigin->setAccessibleName("Show origin");
+	_ui.btnShowOrigin->setAccessibleDescription("Display the calculated event origin on the map");
+
 	connect(_ui.btnInspect, SIGNAL(clicked()), this, SLOT(inspect()));
+	_ui.btnInspect->setAccessibleName("Inspect event");
+	_ui.btnInspect->setAccessibleDescription("Inspect details of the located seismic event");
+
 	connect(_ui.btnCommit, SIGNAL(clicked()), this, SLOT(commit()));
+	_ui.btnCommit->setAccessibleName("Commit event");
+	_ui.btnCommit->setAccessibleDescription("Save the located event to the database");
 
 	connect(_ui.cbDepth, SIGNAL(currentTextChanged(QString)),
 	        this, SLOT(relocate()));
@@ -361,8 +434,39 @@ void Associator::syncPicksView() {
 		marker.second = new Badge(marker.first, badges);
 		connect(static_cast<Badge*>(marker.second)->buttonClose(),
 		        SIGNAL(clicked()), this, SLOT(removePick()));
+		connect(marker.second, SIGNAL(pickSelected(const QString&)),
+		        this, SLOT(inspectPick(const QString&)));
 		_pickContainer->layout()->addWidget(marker.second);
 	}
+	
+	// Announce pick count to screen readers
+	QAccessibleEvent event(_pickContainer, QAccessible::LiveRegionChanged);
+	event.setChildCount(_markers.count());
+	QString announcement = QString("Pick list updated: %1 seismic picks for association").arg(_markers.count());
+	event.setValue(announcement);
+	QAccessible::updateAccessibility(&event);
+}
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+void Associator::inspectPick(const QString &pickID) {
+	for ( auto &marker : _markers ) {
+		auto badge = static_cast<Badge*>(marker.second);
+		if ( badge && badge->pickID() == pickID ) {
+			inspect();
+			return;
+		}
+	}
+}
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+void Associator::unsetMessage() {
+	_ui.labelMessage->setVisible(false);
 }
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

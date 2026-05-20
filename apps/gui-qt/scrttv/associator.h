@@ -68,6 +68,7 @@ class Associator : public QWidget {
 		void showOrigin();
 		void inspect();
 		void commit();
+		void inspectPick(const QString &pickID);
 
 	private:
 		using MarkerBadge = QPair<TraceMarker*, QWidget*>;

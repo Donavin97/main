@@ -1,0 +1,733 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<seiscomp>
+	<module name="scpsloc" category="Processing">
+		<description>Advanced P/S phase locator for seismic events with improved depth resolution using both P and S phases.</description>
+		<configuration>
+			<group name="locator">
+				<description>
+				Define parameters of the locator. Supports both P and S phases for improved location quality.
+				</description>
+				<parameter name="profile" type="string" default="iasp91">
+					<description>
+					The locator profile to use.
+					</description>
+				</parameter>
+				<parameter name="defaultDepth" type="double" default="10" unit="km">
+					<description>
+					For each location, scpsloc performs checks to test if the
+					depth estimate is reliable. If the same location quality
+					(e.g. pick RMS) can be achieved while fixing the depth to
+					the default depth, the latter is used. This is most often
+					the case for shallow events with essentially no depth
+					resolution.
+					</description>
+				</parameter>
+				<parameter name="minimumDepth" type="double" default="5" unit="km">
+					<description>
+					The locator might converge at a depth of 0 or even negative
+					depths. This is usually not desired, as 0 km might be
+					interpreted as indicative of e.g. a quarry blast or another
+					explosive source. In the case of "too shallow" locations the
+					minimum depth will be used.
+
+					Note that the minimum depth can also be configured in scolv,
+					possibly to a different value.
+					</description>
+				</parameter>
+			</group>
+			<group name="buffer">
+				<description>
+				Control the buffer of objects.
+				</description>
+				<parameter name="pickKeep" type="double" default="21600" unit="s">
+					<description>
+					Time to keep picks in the buffer with respect to pick time, not creation time.
+					</description>
+				</parameter>
+				<parameter name="originKeep" type="int" default="86400" unit="s">
+					<description>
+					Time to keep origins in buffer.
+					</description>
+				</parameter>
+				<parameter name="cleanupInterval" type="int" default="3600" unit="s">
+					<description>
+					Clean-up interval for removing old/unused objects.
+					</description>
+				</parameter>
+			</group>
+			<group name="autoloc">
+				<description>
+				Define parameters for creating and reporting origins.
+				</description>
+				<parameter name="maxRMS" type="double" default="3.5" unit="s">
+					<description>
+					Maximum travel-time RMS for a location to be reported.
+					</description>
+				</parameter>
+				<parameter name="maxResidual" type="double" default="7.0" unit="s">
+					<description>
+					Maximum travel-time residual (unweighted) for a pick at a station to be used.
+					</description>
+				</parameter>
+				<parameter name="minPhaseCount" type="int" default="6">
+					<description>
+					Minimum number of phases for reporting origins.
+					</description>
+				</parameter>
+				<parameter name="maxDepth" type="double" default="1000" unit="km">
+					<description>
+					Maximum permissible depth for reporting origins.
+					</description>
+				</parameter>
+				<parameter name="maxSGAP" type="double" default="360" unit="deg">
+					<description>
+					Maximum secondary azimuthal gap for an origin to be reported by.
+					The secondary gap is the maximum of the sum of 2 station gaps.
+
+					Default: 360 degrees, i.e. no restriction based on this parameter.
+					</description>
+				</parameter>
+				<parameter name="maxStationDistance" type="double" default="180" unit="deg">
+					<description>
+					Maximum epicntral distance to stations for accepting picks.
+					</description>
+				</parameter>
+				<parameter name="minStaCountIgnorePKP" type="int" default="15">
+					<description>
+					If the station count for stations at &lt; 105 degrees distance
+					exceeds this number, no picks at &gt; 105 degrees will be
+					used in location. They will be loosely associated, though.
+					</description>
+				</parameter>
+				<parameter name="amplTypeAbs" type="string" default="mb">
+					<description>
+					If this string is non-empty, an amplitude obtained from an amplitude
+					object is used by ... . If this string is &quot;mb&quot;, a period
+					obtained from the amplitude object is also used; if it has some other
+					value, then 1 [units?] is used. If this string is empty, then the amplitude
+					is set to 0.5 * thresholdXXL, and 1 [units?] is used for the period.
+					</description>
+				</parameter>
+				<parameter name="amplTypeSNR" type="string" default="snr">
+					<description>
+					If this string is non-empty, it is used to obtain a pick SNR from an
+					amplitude object. If it is empty, the pick SNR is 10.
+					</description>
+				</parameter>
+				<parameter name="grid" type="file" default="@DATADIR@/scpsloc/grid.conf" options="read">
+					<description>
+					Location of the grid file for nucleating origins.
+					</description>
+				</parameter>
+				<parameter name="stationConfig" type="file" default="@DATADIR@/scpsloc/station.conf" options="read">
+					<description>
+					Location of the station configuration file for nucleating origins.
+					</description>
+				</parameter>
+				<parameter name="stationLocations" type="file" default="" options="read">
+					<description>
+					The station file to be used when in offline mode.
+					If no file is given the database is used. An example is given
+					in &quot;@DATADIR@/scpsloc/station-locations.conf&quot;.
+					</description>
+				</parameter>
+				<parameter name="useManualPicks" type="boolean" default="false">
+					<description>
+					Receive and process manual phase picks.
+					</description>
+				</parameter>
+				<parameter name="useManualOrigins" type="boolean" default="false">
+					<description>
+					Receive and process manual origins. Manual picks and arrival
+					weights will be adopted from the manual origin and the processing continues with these.
+					Origins produced this way by adding incoming automatic picks are nevertheless marked as
+					automatic origins. But they may contain manual picks (even pP and S picks).
+
+					Add the LOCATION group to connection.subscriptions for receiving manual origins!
+
+					This is an experimental feature relevant only for large regional and global networks,
+					where results by analysts can be expected before the end
+					of automatic event processing.
+					</description>
+				</parameter>
+				<parameter name="adoptManualDepth" type="boolean" default="true">
+					<description>
+					Adopt the depth from manual origins. Otherwise the default depth
+					in locator.defaultDepth is considered.
+					</description>
+				</parameter>
+				<parameter name="authors" type="list:string">
+					<description>
+					Restrict pick processing to the given author name(s). Apply
+					comma separation for a list of names. If any author name is
+					given, picks from other authors are ignored.
+					</description>
+				</parameter>
+				<parameter name="tryDefaultDepth" type="boolean" default="true">
+					<description>
+					Compare located origin with the origin at the depth given by
+					locator.defaultDepth. The origin with lower RMS is reported.
+					</description>
+				</parameter>
+				<parameter name="publicationIntervalTimeSlope" type="double" unit="s/count" default="0.5">
+					<description>
+					Parameter &quot;a&quot;  in the equation t = aN + b.
+					t is the time interval between sending updates of an origin.
+					N is the arrival count of the origin.
+					</description>
+				</parameter>
+				<parameter name="publicationIntervalTimeIntercept" type="double" unit="s" default="0.">
+					<description>
+					Parameter &quot;b&quot; in the equation t = aN + b.
+					t is the time interval between sending updates of an origin.
+					N is the arrival count of the origin.
+					</description>
+				</parameter>
+				<parameter name="pickLogEnable" type="boolean" default="false">
+					<description>
+					Activate for writing pick log files to &quot;pickLog&quot;.
+					</description>
+				</parameter>
+				<parameter name="pickLog" type="file" default="@LOGDIR@/autoloc-picklog" options="write">
+					<description>
+					Location of pick log file containing information about received
+					picks. Activate &quot;pickLogEnable&quot; for writing the files.
+					</description>
+				</parameter>
+
+				<parameter name="useSPhases" type="boolean" default="true">
+					<description>
+					Enable S phase usage in location. When enabled, S phases
+					(S, SKS, ScS, etc.) will be automatically associated and used
+					in the location process, improving depth resolution and
+					location accuracy.
+					</description>
+				</parameter>
+				<parameter name="sPhaseWeight" type="double" default="1.2">
+					<description>
+					Weight multiplier for S phases relative to P phases.
+					A value of 1.0 means S phases have the same weight as P phases.
+					Values &gt; 1.0 give S phases higher weight, reflecting their value
+					for constraining the hypocenter and improving depth resolution.
+					</description>
+				</parameter>
+				<parameter name="minSPRatio" type="double" default="0.0">
+					<description>
+					Minimum S/P phase ratio for quality control.
+					A value of 0.0 means no requirement. Setting this to e.g. 0.3
+					would require at least 30% as many S phases as P phases.
+					This helps ensure good phase balance for reliable locations.
+					</description>
+				</parameter>
+				<parameter name="useDepthPhases" type="boolean" default="true">
+					<description>
+					Use depth phases (pP, sP, sS) for improved depth resolution.
+					When enabled, these phases will be automatically detected and
+					used to constrain the focal depth.
+					</description>
+				</parameter>
+				<parameter name="maxSPResidual" type="double" default="5.0" unit="s">
+					<description>
+					Maximum S-P time residual for association (seconds).
+					Controls how tightly S phases must match the predicted S-P time
+					based on the P phase arrival. Smaller values ensure tighter
+					association but may miss valid S phases with larger uncertainties.
+					</description>
+				</parameter>
+				<parameter name="minScoreSPhase" type="double" default="5.0">
+					<description>
+					Minimum origin score required for S phase association.
+					Lower values allow S phases to associate to earlier,
+					less-constrained origins.
+					</description>
+				</parameter>
+				<parameter name="minScoreOtherSPhases" type="double" default="6.0">
+					<description>
+					Minimum origin score required for other S phase (ScS, SKS, etc.)
+					association. Slightly higher than S because these phases are
+					less common and more uncertain.
+					</description>
+				</parameter>
+				<parameter name="requireAmplitudes" type="boolean" default="true">
+					<description>
+					Require amplitudes for automatic picks to be processed.
+					Set to false if using pickers that don't produce amplitudes
+					(e.g., AI pickers). When false, picks without amplitudes will
+					still be processed for location.
+					</description>
+				</parameter>
+
+				<group name="xxl">
+					<description>
+					Create origins from XXL picks. These origins will receive the status "preliminary".
+					Use with care! Enabling XXL picks may result in frequent fake solutions.
+					</description>
+					<parameter name="enable" type="boolean" default="false">
+						<description>
+						Picks with exceptionally large amplitudes may be flagged as XXL,
+						allowing (in future) faster, preliminary "heads-up" alerts.
+
+						This option enables the feature.
+						</description>
+					</parameter>
+					<parameter name="minAmplitude" type="double" default="10000">
+						<description>
+						Minimum amplitude for a pick to be flagged as XXL. The
+						value corresponds to the amplitude type configured in
+						autoloc.amplTypeAbs. NOTE that
+						BOTH minAmplitude and minSNR need to be exceeded!
+						</description>
+					</parameter>
+					<parameter name="minSNR" type="double" default="8">
+						<description>
+						Minimum SNR for a pick to be flagged as XXL. NOTE that
+						BOTH minAmplitude and minSNR need to be exceeded!
+						</description>
+					</parameter>
+					<parameter name="minPhaseCount" type="int" default="4">
+						<description>
+						Minimum number of XXL picks for forming an origin.
+						Must be >= 4.
+						</description>
+					</parameter>
+					<parameter name="maxStationDistance" type="double" default="10" unit="deg">
+						<description>
+						Maximum epicentral distance for accepting XXL picks.
+						</description>
+					</parameter>
+					<parameter name="maxDepth" type="double" default="100" unit="km">
+						<description>
+						Maximum depth for creating origins based on XXL arrivals.
+						</description>
+					</parameter>
+				</group>
+				<group name="clustering">
+					<description>
+					DBSCAN-based phase clustering for pick selection, similar to GEMPA scanloc.
+					</description>
+					<parameter name="enable" type="boolean" default="false">
+						<description>
+						Enable DBSCAN-based phase clustering for pick selection.
+						When enabled, picks are clustered based on spatial proximity
+						and temporal coherence to identify groups belonging to the
+						same event and filter out noise picks.
+						</description>
+					</parameter>
+					<parameter name="epsTime" type="double" default="30" unit="s">
+						<description>
+						Time epsilon for clustering (seconds).
+						Picks arriving within this time window may belong to the same cluster.
+						Should be large enough to account for travel time differences across
+						the network (typically 10-60 seconds for regional events).
+						</description>
+					</parameter>
+					<parameter name="epsDist" type="double" default="500" unit="km">
+						<description>
+						Distance epsilon for clustering (km).
+						Picks from stations within this distance may cluster together.
+						</description>
+					</parameter>
+					<parameter name="minPts" type="int" default="3">
+						<description>
+						Minimum number of picks to form a cluster.
+						Clusters with fewer picks than this are not considered valid.
+						</description>
+					</parameter>
+					<parameter name="timeWeight" type="double" default="1.0">
+						<description>
+						Weight for time dimension in combined distance metric.
+						Higher values give more weight to temporal proximity.
+						</description>
+					</parameter>
+					<parameter name="distWeight" type="double" default="1.0">
+						<description>
+						Weight for spatial dimension in combined distance metric.
+						Higher values give more weight to spatial proximity.
+						</description>
+					</parameter>
+					<parameter name="usePhaseType" type="boolean" default="true">
+						<description>
+						Require compatible phase types within a cluster.
+						When true, P-family and S-family picks are preferentially clustered together.
+						</description>
+					</parameter>
+					<parameter name="useTravelTime" type="boolean" default="true">
+						<description>
+						Use travel-time corrected time for clustering.
+						When enabled, adjusts temporal distance based on station separation.
+						</description>
+					</parameter>
+					<parameter name="maxClusterTime" type="double" default="60" unit="s">
+						<description>
+						Maximum time span within a cluster (seconds).
+						Clusters spanning more than this time are not considered valid.
+						</description>
+					</parameter>
+					<parameter name="minPhases" type="int" default="4">
+						<description>
+						Minimum phases for a valid cluster.
+						Clusters must have at least this many total phases to be considered valid.
+						</description>
+					</parameter>
+					<parameter name="filterPicks" type="boolean" default="true">
+						<description>
+						Use clustering to filter picks before nucleation.
+						When true, picks not belonging to a valid cluster are rejected,
+						helping to remove noise picks from spurious detections.
+						</description>
+					</parameter>
+					<parameter name="boostScore" type="boolean" default="true">
+						<description>
+						Boost score for picks in high-quality clusters.
+						When true, origins formed from picks in valid clusters get a score boost.
+						</description>
+					</parameter>
+					<parameter name="scoreThreshold" type="double" default="10.0">
+						<description>
+						Score threshold for boosting (arbitrary units, similar to origin scores).
+						Only clusters with scores above this threshold get their picks boosted.
+						</description>
+					</parameter>
+					<parameter name="scoreMultiplier" type="double" default="1.5">
+						<description>
+						Score multiplier for clustered picks.
+						Origins from clustered picks get their score multiplied by this factor.
+						Values &gt; 1.0 give preference to clustered pick sets.
+						</description>
+					</parameter>
+				</group>
+			</group>
+		</configuration>
+		<command-line>
+			<synopsis>
+			scpsloc [options]
+			</synopsis>
+			<group name="Generic">
+				<optionReference>generic#help</optionReference>
+				<optionReference>generic#version</optionReference>
+				<optionReference>generic#config-file</optionReference>
+				<optionReference>generic#plugins</optionReference>
+				<optionReference>generic#daemon</optionReference>
+				<optionReference>generic#auto-shutdown</optionReference>
+				<optionReference>generic#shutdown-master-module</optionReference>
+				<optionReference>generic#shutdown-master-username</optionReference>
+			</group>
+
+			<group name="Verbosity">
+				<optionReference>verbosity#verbosity</optionReference>
+				<optionReference>verbosity#v</optionReference>
+				<optionReference>verbosity#quiet</optionReference>
+				<optionReference>verbosity#component</optionReference>
+				<optionReference>verbosity#syslog</optionReference>
+				<optionReference>verbosity#lockfile</optionReference>
+				<optionReference>verbosity#console</optionReference>
+				<optionReference>verbosity#debug</optionReference>
+				<optionReference>verbosity#log-file</optionReference>
+			</group>
+
+			<group name="Messaging">
+				<optionReference>messaging#user</optionReference>
+				<optionReference>messaging#host</optionReference>
+				<optionReference>messaging#timeout</optionReference>
+				<optionReference>messaging#primary-group</optionReference>
+				<optionReference>messaging#subscribe-group</optionReference>
+				<optionReference>messaging#content-type</optionReference>
+				<optionReference>messaging#start-stop-msg</optionReference>
+			</group>
+
+			<group name="Database">
+				<optionReference>database#db-driver-list</optionReference>
+				<optionReference>database#database</optionReference>
+				<optionReference>database#config-module</optionReference>
+				<optionReference>database#inventory-db</optionReference>
+				<optionReference>database#db-disable</optionReference>
+			</group>
+
+			<group name="Mode">
+				<option flag="" long-flag="test" argument="" default="">
+					<description>
+					Do not send any object.
+					</description>
+				</option>
+				<option flag="" long-flag="offline" argument="" default="">
+					<description>
+					Do not connect to a messaging server. Instead a
+					station-locations.conf file can be provided. This implies
+					--test and --playback
+					</description>
+				</option>
+				<option flag="" long-flag="playback" argument="" default="">
+					<description>
+					Flush origins immediately without delay.
+					</description>
+				</option>
+			</group>
+
+			<group name="Mode">
+				<option flag="" long-flag="test" >
+					<description>
+					Do not send any object.
+					</description>
+				</option>
+				<option flag="" long-flag="offline" >
+					<description>
+					Flush origins immediately without delay.
+					</description>
+				</option>
+			</group>
+
+			<group name="Input">
+				<option flag="" long-flag="ep" argument="file">
+					<description>
+					Name of input XML file (SCML) with all picks and origins for
+					offline processing. Use '-' to read from stdin. The
+					database connection is not received from messaging and must
+					be provided. Results are sent in XML to stdout.
+					</description>
+				</option>
+			</group>
+
+			<group name="Settings">
+				<option flag="" long-flag="allow-rejected-picks">
+					<description>
+					Allow picks with evaluation status 'rejected' for nucleation
+					and association.
+					</description>
+				</option>
+				<option flag="" long-flag="station-locations" argument="arg" default="">
+					<description>
+					The station-locations.conf file to use when in
+					offline mode (started with --offline).
+					If no file is given the database is used.
+					</description>
+				</option>
+
+				<option flag="" long-flag="station-config" argument="arg" default="">
+					<description>
+					The station configuration file. Examples are in @DATADIR@/scpsloc/
+					</description>
+				</option>
+
+				<option flag="" long-flag="grid" argument="arg" default="">
+					<description>
+					The grid configuration file. Examples are in @DATADIR@/scpsloc/
+					</description>
+				</option>
+
+				<option flag="" long-flag="pick-log" argument="arg" default="">
+					<description>
+					The pick log file. Providing a file name enables logging picks
+					even when disabled by configuration.
+					</description>
+				</option>
+				<option flag="" long-flag="default-depth" argument="arg" default="10">
+					<description>
+					Default depth for comparison with the depth after locating.
+					</description>
+				</option>
+
+				<option flag="" long-flag="max-sgap" argument="arg" default="360">
+					<description>
+					Maximum secondary azimuthal gap for an origin to be reported.
+					The secondary gap is the maximum of the sum of 2 station gaps.
+					</description>
+				</option>
+
+				<option flag="" long-flag="max-rms" argument="arg" default="3.5">
+					<description>
+					Maximum travel-time RMS for a location to be reported.
+					</description>
+				</option>
+
+				<option flag="" long-flag="max-residual" argument="arg" default="3">
+					<description>
+					Maximum travel-time residual (unweighted) for a pick at a
+					station to be used.
+					</description>
+				</option>
+
+				<option flag="" long-flag="max-station-distance" argument="arg" default="5">
+					<description>
+					Maximum distance of stations to be used.
+					</description>
+				</option>
+
+				<option flag="" long-flag="max-nucleation-distance-default" argument="arg" default="180">
+					<description>
+					Default maximum distance of stations to be used for nucleating new origins.
+					</description>
+				</option>
+
+				<option flag="" long-flag="min-pick-affinity" argument="arg" default="0.05">
+					<description></description>
+				</option>
+
+				<option flag="" long-flag="min-phase-count" argument="arg" default="4">
+					<description>
+					Minimum number of picks for an origin to be reported.</description>
+				</option>
+
+				<option flag="" long-flag="min-score" argument="arg" default="8">
+					<description>
+					Minimum score for an origin to be reported.
+					</description>
+				</option>
+
+				<option flag="" long-flag="min-pick-snr" argument="arg" default="3">
+					<description>
+					Minimum SNR for a pick to be processed.
+					</description>
+				</option>
+
+				<option flag="" long-flag="require-amplitudes" argument="arg" default="true">
+					<description>
+					Require amplitudes for automatic picks to be processed.
+					Set to false if using pickers that don't produce amplitudes (e.g., AI pickers).
+					When false, picks without amplitudes will still be processed for location.
+					</description>
+				</option>
+
+				<option flag="" long-flag="use-s-phases" argument="arg" default="true">
+					<description>
+					Enable S-phase usage in location.
+					</description>
+				</option>
+				<option flag="" long-flag="s-phase-weight" argument="arg" default="1.2">
+					<description>
+					Weight multiplier for S phases relative to P phases.
+					</description>
+				</option>
+				<option flag="" long-flag="min-sp-ratio" argument="arg" default="0.0">
+					<description>
+					Minimum S/P phase ratio for quality control (0.0 = no requirement).
+					</description>
+				</option>
+				<option flag="" long-flag="max-sp-residual" argument="arg" default="5.0">
+					<description>
+					Maximum S-P time residual for association (seconds).
+					</description>
+				</option>
+				<option flag="" long-flag="min-score-s-phase" argument="arg" default="5.0">
+					<description>
+					Minimum origin score required for S phase association.
+					</description>
+				</option>
+				<option flag="" long-flag="min-score-other-s-phases" argument="arg" default="6.0">
+					<description>
+					Minimum origin score required for other S phase (ScS, SKS, etc.) association.
+					</description>
+				</option>
+
+				<option flag="" long-flag="threshold-xxl" argument="arg" default="10000000">
+					<description>
+					An amplitude exceeding this threshold will flag the pick as XXL.
+					</description>
+				</option>
+
+				<option flag="" long-flag="min-phase-count-xxl" argument="arg" default="4">
+					<description>
+					Minimum number of picks for an XXL origin to be reported.
+					</description>
+				</option>
+
+				<option flag="" long-flag="max-distance-xxl" argument="arg" default="15">
+					<description></description>
+				</option>
+
+				<option flag="" long-flag="min-sta-count-ignore-pkp" argument="arg" default="15">
+					<description>
+					Minimum station count for which we ignore PKP phases.
+					</description>
+				</option>
+
+				<option flag="" long-flag="min-score-bypass-nucleator" argument="arg" default="40">
+					<description>
+					Minimum score at which the nucleator is bypassed.
+					</description>
+				</option>
+
+				<option flag="" long-flag="keep-events-timespan" argument="arg" default="86400">
+					<description>
+					The timespan to keep historical events.
+					</description>
+				</option>
+
+				<option flag="" long-flag="cleanup-interval" argument="arg" default="3600">
+					<description>
+					The object cleanup interval in seconds.
+					</description>
+				</option>
+
+				<option flag="" long-flag="max-age" argument="arg" default="3784320000">
+					<description>
+					During cleanup all pick objects older than maxAge (in seconds)
+					are removed (maxAge == 0 disables cleanup).
+					</description>
+				</option>
+
+				<option flag="" long-flag="wakeup-interval" argument="arg" default="5" unit="s">
+					<description>
+					The interval in seconds to check pending operations.
+					</description>
+				</option>
+
+				<option flag="" long-flag="dynamic-pick-threshold-interval" argument="arg" default="60">
+					<description>
+					The interval in seconds in which to check for extraordinarily
+					high pick activity, resulting in a dynamically increased
+					pick threshold.
+					</description>
+				</option>
+
+				<option flag="" long-flag="clustering-enable" argument="arg" default="false">
+					<description>
+					Enable DBSCAN-based phase clustering.
+					</description>
+				</option>
+				<option flag="" long-flag="clustering-eps-time" argument="arg" default="30">
+					<description>
+					Time epsilon for clustering (seconds).
+					</description>
+				</option>
+				<option flag="" long-flag="clustering-eps-dist" argument="arg" default="500">
+					<description>
+					Distance epsilon for clustering (km).
+					</description>
+				</option>
+				<option flag="" long-flag="clustering-min-pts" argument="arg" default="3">
+					<description>
+					Minimum picks to form a cluster.
+					</description>
+				</option>
+				<option flag="" long-flag="clustering-min-phases" argument="arg" default="4">
+					<description>
+					Minimum phases for a valid cluster.
+					</description>
+				</option>
+				<option flag="" long-flag="clustering-filter-picks" argument="arg" default="true">
+					<description>
+					Filter picks based on clustering results.
+					</description>
+				</option>
+				<option flag="" long-flag="clustering-boost-score" argument="arg" default="true">
+					<description>
+					Boost score for picks in high-quality clusters.
+					</description>
+				</option>
+				<option flag="" long-flag="clustering-score-multiplier" argument="arg" default="1.5">
+					<description>
+					Score multiplier for clustered picks.
+					</description>
+				</option>
+			</group>
+			<group name="Output">
+				<option flag="f" long-flag="formatted">
+					<description>
+					Use formatted XML output along with '--ep'. Otherwise XML
+					is unformatted.
+					</description>
+				</option>
+			</group>
+		</command-line>
+	</module>
+</seiscomp>

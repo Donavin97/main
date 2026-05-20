@@ -299,12 +299,13 @@ class MainWindow : public Seiscomp::Gui::MainWindow {
 		void reverse();
 
 
-	protected:
+ 	protected:
 		void toggledFullScreen(bool);
 		void applyFilter();
+		void keyPressEvent(QKeyEvent *event) override;
 
 
-	private:
+ 	private:
 		void loadFiles();
 
 		DataModel::ConfigStation* configStation(const std::string& networkCode,
